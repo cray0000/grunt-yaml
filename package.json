@@ -41,7 +41,7 @@
     "gruntplugin"
   ],
   "dependencies": {
-    "js-yaml": "~1.0.3",
+    "js-yaml": "2.x",
     "async": "~0.1.22"
   }
 }
