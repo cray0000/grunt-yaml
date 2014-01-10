@@ -31,6 +31,17 @@ module.exports = function(grunt) {
       });
     });
 
+    var includeYamlType = new yaml.Type('!include', {
+      loadKind: 'scalar',
+      loadResolver: function (state) {
+        var file = grunt.file.read(state.result, 'utf-8');
+        state.result = yaml.load( file );
+        return true;
+      }
+    });
+
+    var INCLUDE_SCHEMA = yaml.Schema.create([ includeYamlType ]);
+
     async.forEach(this.files, function(filePair, done) {
       filePair.src.forEach(function(src) {
         if (grunt.file.isDir(src) || (options.ignored && path.basename(src).match(options.ignored))) {
@@ -50,7 +61,7 @@ module.exports = function(grunt) {
             grunt.log.writeln('Compiled ' + src.cyan + ' -> ' + dest.cyan);
           }
           done();
-        });
+        }, { schema: INCLUDE_SCHEMA });
       });
     }, function(err) {
       if (err) {
