@@ -34,7 +34,12 @@ module.exports = function(grunt) {
     var includeYamlType = new yaml.Type('!include', {
       loadKind: 'scalar',
       loadResolver: function (state) {
-        var file = grunt.file.read(state.result, 'utf-8');
+        var filename, file;
+        if (state.result[0] === '/')
+          filename = state.result.slice(1);
+        else
+          filename = path.join( path.dirname(state.filename), state.result );
+        file = grunt.file.read(filename, 'utf-8');
         state.result = yaml.load( file );
         return true;
       }
@@ -61,7 +66,7 @@ module.exports = function(grunt) {
             grunt.log.writeln('Compiled ' + src.cyan + ' -> ' + dest.cyan);
           }
           done();
-        }, { schema: INCLUDE_SCHEMA });
+        }, { schema: INCLUDE_SCHEMA, filename: src });
       });
     }, function(err) {
       if (err) {
