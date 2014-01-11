@@ -11,6 +11,7 @@
 var path = require('path');
 var yaml = require('js-yaml');
 var async = require('async');
+var IMPORT_ANCHOR_FIELD = '__grunt-yaml-specified-anchor';
 
 module.exports = function(grunt) {
   grunt.registerMultiTask('yaml', 'Compile YAML to JSON', function() {
@@ -31,21 +32,53 @@ module.exports = function(grunt) {
       });
     });
 
-    var includeYamlType = new yaml.Type('!include', {
+    var includeYamlType, INCLUDE_SCHEMA;
+
+    includeYamlType = new yaml.Type('!include', {
       loadKind: 'scalar',
       loadResolver: function (state) {
-        var filename, file;
-        if (state.result[0] === '/')
+        var filename, data, parts, src, anchor, json;
+
+        // Get a specific pointer if present
+        parts = state.result.split(' *');
+        src = parts[0];
+        anchor = parts[1];
+
+        // Load file with proper absolute/relative path handling
+        if (src[0] === '/')
           filename = state.result.slice(1);
         else
-          filename = path.join( path.dirname(state.filename), state.result );
-        file = grunt.file.read(filename, 'utf-8');
-        state.result = yaml.load( file );
+          filename = path.join( path.dirname(state.filename), src );
+        data = grunt.file.read(filename, 'utf-8');
+
+        if (anchor) {
+          // Check whether the included file has anchor specified
+          if ( ! (new RegExp(' &' + anchor + '[ \n]+')).test(data) ) {
+            grunt.warn('' + filename + ' doesn\'t have anchor &'
+                + anchor + '.');
+            return false
+          }
+
+          data += '\n' + IMPORT_ANCHOR_FIELD + ': *' + anchor;
+        }
+
+        // Parse included file
+        json = yaml.load( data, {
+          schema: INCLUDE_SCHEMA,
+          filename: filename
+        });
+
+        // Return the whole json result or a particular anchor if specified
+        if (anchor)
+          state.result = json[IMPORT_ANCHOR_FIELD];
+        else
+          state.result = json;
+
         return true;
       }
     });
 
-    var INCLUDE_SCHEMA = yaml.Schema.create([ includeYamlType ]);
+    INCLUDE_SCHEMA = yaml.Schema.create([ includeYamlType ]);
 
     async.forEach(this.files, function(filePair, done) {
       filePair.src.forEach(function(src) {
