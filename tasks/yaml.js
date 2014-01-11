@@ -49,6 +49,14 @@ module.exports = function(grunt) {
           filename = state.result.slice(1);
         else
           filename = path.join( path.dirname(state.filename), src );
+
+        // Add .yml/.yaml extension unless explicitly specified
+        if (! /\.ya?ml/.test(filename))
+          if ( grunt.file.exists(filename + '.yml') )
+            filename += '.yml';
+          else
+            filename += '.yaml';
+
         data = grunt.file.read(filename, 'utf-8');
 
         if (anchor) {
