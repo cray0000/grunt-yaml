@@ -46,7 +46,7 @@ module.exports = function(grunt) {
 
         // Load file with proper absolute/relative path handling
         if (src[0] === '/')
-          filename = state.result.slice(1);
+          filename = path.normalize(state.result.slice(1));
         else
           filename = path.join( path.dirname(state.filename), src );
 
