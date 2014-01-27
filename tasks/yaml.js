@@ -60,9 +60,6 @@ module.exports = function(grunt) {
         data = grunt.file.read(filename, 'utf-8');
 
         if (anchor) {
-          console.log("=================== GETTING ANCHOR " + src);
-          console.log("=================== READING FILE " + filename);
-          console.log(data);
 
           // Check whether the included file has anchor specified
           if ( ! (new RegExp(' &' + anchor + '[ \n\r]+')).test(data) ) {
