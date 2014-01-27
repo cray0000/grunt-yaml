@@ -45,8 +45,8 @@ module.exports = function(grunt) {
         anchor = parts[1];
 
         // Load file with proper absolute/relative path handling
-        if (src[0] === '/')
-          filename = path.normalize(state.result.slice(1));
+        if (src[0] === '/' || src[0] === '\\')
+          filename = path.normalize( state.result.slice(1) );
         else
           filename = path.join( path.dirname(state.filename), src );
 
@@ -60,6 +60,10 @@ module.exports = function(grunt) {
         data = grunt.file.read(filename, 'utf-8');
 
         if (anchor) {
+          console.log("=================== GETTING ANCHOR " + src);
+          console.log("=================== READING FILE " + filename);
+          console.log(data);
+
           // Check whether the included file has anchor specified
           if ( ! (new RegExp(' &' + anchor + '[ \n]+')).test(data) ) {
             grunt.warn('' + filename + ' doesn\'t have anchor &'
