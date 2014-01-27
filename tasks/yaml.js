@@ -65,7 +65,7 @@ module.exports = function(grunt) {
           console.log(data);
 
           // Check whether the included file has anchor specified
-          if ( ! (new RegExp(' &' + anchor + '[ \n]+')).test(data) ) {
+          if ( ! (new RegExp(' &' + anchor + '[ \n\r]+')).test(data) ) {
             grunt.warn('' + filename + ' doesn\'t have anchor &'
                 + anchor + '.');
             return false
